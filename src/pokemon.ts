@@ -14,7 +14,7 @@ export const POOLS: Record<Rarity, Pokemon[]> = {
   3: [p('Pikachu', 'pikachu.png'), p('Squirtle', 'squirtle.png'), p('Charmander', 'charmander.png'), p('Mimikyu', 'mimikyu.png')],
   4: [p('Leafeon', 'leafeon.png'), p('Flareon', 'flareon.png'), p('Sylveon', 'sylveon.png'), p('Espeon', 'espeon.png'), p('Umbreon', 'umbreon.png')],
   5: [p('Mew', 'mew.png'), p('Charizard', 'charizard.png'), p('Gengar', 'gengar.png')],
-  6: [p('Rayquaza', 'rayquaza.jpg'), p('Groudon', 'groudon.jpg'), p('Lugia', 'lugia.jpg'), p('Rayquaza Hitam', 'rayquaza-black.jpg')],
+  6: [p('Rayquaza', 'rayquaza.jpg'), p('Groudon', 'groudon.jpg'), p('Lugia', 'lugia.jpg'), p('Shiny Rayquaza', 'rayquaza-black.jpg')],
 }
 
 export const pokemonFor = (rarity: Rarity, roll: number): Pokemon => {

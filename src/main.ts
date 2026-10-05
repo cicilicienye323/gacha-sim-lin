@@ -17,10 +17,10 @@ const MAX_BUDGET = 100_000_000
 const CARD_MS = 1000 // 10 cards + one 6★ pause + last flip = 13.7 s, under the 14 s limit (AC-9)
 const HERO_MS = 2500
 const STARS = { 3: '★★★', 4: '★★★★', 5: '★★★★★', 6: '★★★★★★' } as const
-const EMPTY = '<div class="empty"><span class="hint">Lempar Poké Ball untuk mulai!</span></div>'
+const EMPTY = '<div class="empty"><span class="hint">Throw a Poké Ball to start!</span></div>'
 
-const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('id-ID')
-const pct = (x: number) => (x * 100).toFixed(2).replace('.', ',') + '%'
+const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('en-US')
+const pct = (x: number) => (x * 100).toFixed(2) + '%'
 
 // Images may be missing (public/pokemon/ is gitignored): a failed <img> removes itself, text stays.
 const IMG_FALLBACK = 'onerror="this.remove()"'
@@ -30,7 +30,7 @@ const tierChip = (r: Rarity) => `<span class="tierchip t${r}">${STARS[r]} ${TIER
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="screen">
   <h1 class="logo">${BALL}GACHA SIM</h1>
-  <p class="sub">Lempar Poké Ball, kumpulkan Pokémon, dan lihat berapa biayanya sampai dapat Legendary.</p>
+  <p class="sub">Throw Poké Balls, collect Pokémon, and see what it costs to land a Legendary.</p>
   <div class="layout">
     <div class="main">
       <div class="dex">
@@ -41,47 +41,47 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
         <button class="btn" id="pull1">${BALL}<span>Pull x1 <small>${rp(PRICE_PER_PULL)}</small></span></button>
         <button class="btn primary" id="pull10">${BALL}<span>Pull x10 <small>${rp(PRICE_PER_PULL * 10)}</small></span></button>
         <span class="spacer"></span>
-        <button class="btn ghost" id="reset">Reset sesi</button>
+        <button class="btn ghost" id="reset">Reset session</button>
       </div>
     </div>
     <div class="side">
       <div class="panel"><h3>Budget</h3><div class="body">
         <label class="field">Rp <input id="budget" aria-label="Budget" inputmode="numeric" value="500000"></label>
-        <div class="stat"><span>Terpakai</span><b data-testid="spent"></b></div>
-        <div class="stat"><span>Sisa</span><b data-testid="remaining"></b></div>
+        <div class="stat"><span>Spent</span><b data-testid="spent"></b></div>
+        <div class="stat"><span>Left</span><b data-testid="remaining"></b></div>
       </div></div>
       <div class="panel"><h3>Pity</h3><div class="body">
-        <div class="stat"><span>Tanpa Legendary</span><b data-testid="pity"></b></div>
+        <div class="stat"><span>Pulls without Legendary</span><b data-testid="pity"></b></div>
         <div class="hp"><span class="lbl">HP</span><div class="bar" data-testid="pity-bar"><span></span><i></i></div></div>
         <div class="bar-cap"><span>0</span><span>50</span><span>99</span></div>
       </div></div>
-      <div class="panel"><h3>Peluang pull berikutnya</h3><div class="body">
+      <div class="panel"><h3>Next pull odds</h3><div class="body">
         <div class="rate" id="rate-6-row">${tierChip(6)}<b data-testid="rate-6"></b></div>
         <div class="rate">${tierChip(5)}<b data-testid="rate-5"></b></div>
         <div class="rate">${tierChip(4)}<b data-testid="rate-4"></b></div>
         <div class="rate">${tierChip(3)}<b data-testid="rate-3"></b></div>
       </div></div>
-      <div class="panel"><h3>Ringkasan sesi</h3><div class="body">
-        <div class="stat"><span>Total pull</span><b data-testid="total-pulls"></b></div>
+      <div class="panel"><h3>Session summary</h3><div class="body">
+        <div class="stat"><span>Total pulls</span><b data-testid="total-pulls"></b></div>
         <div class="stat"><span>Legendary</span><b data-testid="count-6"></b></div>
         <div class="stat"><span>Rare</span><b data-testid="count-5"></b></div>
       </div></div>
-      <div class="panel"><h3>Rata-rata dapat Legendary</h3><div class="body">
-        <div class="stat big"><span data-testid="avg-pulls">${String(AVG_PULLS_TO_6).replace('.', ',')} pull</span><b data-testid="avg-cost">${rp(AVG_COST_TO_6)}</b></div>
+      <div class="panel"><h3>Average cost to a Legendary</h3><div class="body">
+        <div class="stat big"><span data-testid="avg-pulls">${AVG_PULLS_TO_6} pulls</span><b data-testid="avg-cost">${rp(AVG_COST_TO_6)}</b></div>
       </div></div>
     </div>
   </div>
 </div>
 <dialog id="warn">
-  <h2>Melewati budget</h2>
+  <h2>Over budget</h2>
   <div class="stat"><span id="warn-label"></span><b id="warn-cost"></b></div>
-  <div class="stat"><span>Sisa budget</span><b id="warn-left"></b></div>
-  <div class="stat over"><span>Lewat budget</span><b data-testid="over"></b></div>
-  <p class="ask">Tetap lempar Poké Ball?</p>
+  <div class="stat"><span>Budget left</span><b id="warn-left"></b></div>
+  <div class="stat over"><span>Over by</span><b data-testid="over"></b></div>
+  <p class="ask">Throw the Poké Ball anyway?</p>
   <div class="actions">
-    <button class="btn" id="cancel">Batal</button>
+    <button class="btn" id="cancel">Cancel</button>
     <span class="spacer"></span>
-    <button class="btn primary" id="confirm">Tetap pull</button>
+    <button class="btn primary" id="confirm">Pull anyway</button>
   </div>
 </dialog>`
 
@@ -137,7 +137,7 @@ const openCard = (el: HTMLElement, r: PullResult) => {
 
 const setBusy = (busy: boolean) => buttons.forEach((b) => (b.disabled = busy))
 
-// Sleeps, but wakes early when Lewati is pressed.
+// Sleeps, but wakes early when Skip is pressed.
 let wake: (() => void) | null = null
 const sleep = (ms: number) =>
   new Promise<void>((resolve) => {
@@ -148,7 +148,7 @@ const sleep = (ms: number) =>
 async function reveal(results: PullResult[]) {
   setBusy(true)
   stage.innerHTML = `<div class="cards">${results.map(closedCard).join('')}</div>
-    <div class="skip"><button class="btn ghost small" id="skip">Lewati ⏭</button></div>`
+    <div class="skip"><button class="btn ghost small" id="skip">Skip ⏭</button></div>`
   const cards = [...stage.querySelectorAll<HTMLElement>('.card')]
   let skipped = false
   const finish = () => {
@@ -169,7 +169,7 @@ async function reveal(results: PullResult[]) {
     const r = results[i]
     if (r.rarity === 6) {
       stage.insertAdjacentHTML('beforeend', `<div class="hero" data-testid="hero"><div class="card c6" data-open="true">${faceHtml(r)}</div>
-        <p>6★ di pull ke-${r.pullNumber}. Biaya sampai dapat: ${rp(r.pullsTo6! * PRICE_PER_PULL)}</p></div>`)
+        <p>Legendary on pull ${r.pullNumber}. Cost to get it: ${rp(r.pullsTo6! * PRICE_PER_PULL)}</p></div>`)
       await sleep(HERO_MS)
       if (skipped) return
       stage.querySelector('.hero')?.remove()
