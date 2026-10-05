@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Placeholder tokens; final values are locked in 02-DESAIN (sien-docs/design-system.md). */
+@theme {
+  --color-bg: #121418;
+  --color-fg: #e6e6e6;
+  --color-accent: #f5b301;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+}
