@@ -30,7 +30,7 @@ const tierChip = (r: Rarity) => `<span class="tierchip t${r}">${STARS[r]} ${TIER
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="screen">
   <h1 class="logo">${BALL}GACHA SIM</h1>
-  <p class="sub">Tangkap Pokémon gaya gacha. Uangnya pura-pura, peluangnya sungguhan.</p>
+  <p class="sub">Lempar Poké Ball, kumpulkan Pokémon, dan lihat berapa biayanya sampai dapat Legendary.</p>
   <div class="layout">
     <div class="main">
       <div class="dex">
