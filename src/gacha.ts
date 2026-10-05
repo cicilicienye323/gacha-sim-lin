@@ -23,9 +23,10 @@ export interface Rates {
   r3: number
 }
 
-export const PRICE_PER_PULL = 0
-export const AVG_PULLS_TO_6 = 0
-export const AVG_COST_TO_6 = 0
+export const PRICE_PER_PULL = 8_000 // rupiah, integer
+// Fixed display values; a test checks them against expectedPullsTo6().
+export const AVG_PULLS_TO_6 = 34.59
+export const AVG_COST_TO_6 = 276_756
 
 const todo = (): never => {
   throw new Error('not implemented')
@@ -73,5 +74,15 @@ export const pull = (s: Session, count: 1 | 10, rng: () => number): { session: S
   }
   return { session, results }
 }
-export const expectedPullsTo6 = (): number => todo()
+// Exact expectation: sum of n × P(first 6★ on pull n), n = 1..99.
+export const expectedPullsTo6 = (): number => {
+  let noSixYet = 1
+  let expected = 0
+  for (let pity = 0; pity < 99; pity++) {
+    const { r6 } = rates(pity)
+    expected += (pity + 1) * noSixYet * r6
+    noSixYet *= 1 - r6
+  }
+  return expected
+}
 export const overBudget = (_s: Session, _count: 1 | 10): number => todo()
