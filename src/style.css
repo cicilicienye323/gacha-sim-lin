@@ -55,7 +55,7 @@ h1 { font-size: 22px; font-weight: 700; color: var(--color-accent); letter-spaci
 .cards { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
 .card { height: 100px; border-radius: 6px; background: repeating-linear-gradient(45deg, #1b1e24 0 8px, #20242b 8px 16px); border: 1px solid var(--color-border); border-bottom: 4px solid var(--color-border); display: flex; flex-direction: column; justify-content: flex-end; padding: 8px; font-size: 12px; }
 .card > * { visibility: hidden; }
-.card[data-open="true"] { background: var(--color-surface-2); animation: open .25s ease-out; }
+.card[data-open="true"] { background: var(--color-surface-2); animation: open 1.2s cubic-bezier(.2, .7, .2, 1); }
 .card[data-open="true"] > * { visibility: visible; }
 .card .st { font-size: 13px; letter-spacing: -1px; }
 .card .nm { color: var(--color-muted); font-size: 11px; margin-top: 2px; }
@@ -63,7 +63,7 @@ h1 { font-size: 22px; font-weight: 700; color: var(--color-accent); letter-spaci
 .card[data-open="true"].c4 { border-bottom-color: var(--color-r4); }
 .card[data-open="true"].c5 { border-bottom-color: var(--color-r5); box-shadow: 0 0 14px rgba(245, 211, 74, .35); }
 .card[data-open="true"].c6 { border: 1px solid var(--color-r6); border-bottom: 4px solid var(--color-r6); box-shadow: 0 0 22px rgba(255, 138, 31, .6); background: linear-gradient(180deg, #3a2410, #242830); }
-@keyframes open { from { transform: rotateY(90deg) scale(.9); } to { transform: none; } }
+@keyframes open { 0% { transform: rotateY(90deg) translateY(12px) scale(.85); opacity: .3; } 60% { transform: rotateY(0) translateY(-6px) scale(1.04); opacity: 1; } 100% { transform: none; } }
 
 .hero { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: rgba(12, 13, 16, .85); border-radius: var(--radius); }
 .hero .card { width: 150px; height: 190px; font-size: 14px; animation: glow 1s ease-out; }
@@ -89,3 +89,4 @@ dialog::backdrop { background: rgba(5, 6, 8, .72); }
 dialog h2 { margin: 0 0 12px; font-size: 17px; font-weight: 700; color: var(--color-danger); }
 dialog .over { border-top: 1px solid var(--color-border); margin-top: 6px; padding-top: 8px; font-weight: 700; }
 dialog .over b { color: var(--color-danger); }
+.stage.skipped .card { animation: none; }

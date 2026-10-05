@@ -12,8 +12,8 @@ import {
 } from './gacha'
 
 const MAX_BUDGET = 100_000_000
-const CARD_MS = 180 // 10 cards + one 6★ pause = 2.7 s, under the 3 s limit (AC-9)
-const HERO_MS = 900
+const CARD_MS = 1000 // 10 cards + one 6★ pause + last flip = 13.7 s, under the 14 s limit (AC-9)
+const HERO_MS = 2500
 const STARS = { 3: '★★★', 4: '★★★★', 5: '★★★★★', 6: '★★★★★★' } as const
 
 const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('id-ID')
@@ -139,7 +139,8 @@ async function reveal(results: PullResult[]) {
     renderSide()
     setBusy(false)
   }
-  skip = () => { skipped = true; wake?.(); finish() }
+  stage.classList.remove('skipped')
+  skip = () => { skipped = true; stage.classList.add('skipped'); wake?.(); finish() }
 
   for (let i = 0; i < results.length; i++) {
     await sleep(CARD_MS)
