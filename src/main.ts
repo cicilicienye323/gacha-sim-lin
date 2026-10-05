@@ -12,8 +12,8 @@ import {
 } from './gacha'
 
 const MAX_BUDGET = 100_000_000
-const CARD_MS = 200 // 10 cards + one 6★ pause stay under 3 s (AC-9)
-const HERO_MS = 1000
+const CARD_MS = 180 // 10 cards + one 6★ pause = 2.7 s, under the 3 s limit (AC-9)
+const HERO_MS = 900
 const STARS = { 3: '★★★', 4: '★★★★', 5: '★★★★★', 6: '★★★★★★' } as const
 
 const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('id-ID')
