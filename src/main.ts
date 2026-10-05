@@ -8,61 +8,67 @@ import {
   pull,
   rates,
   type PullResult,
+  type Rarity,
   type Session,
 } from './gacha'
+import { TIERS, pokemonFor } from './pokemon'
 
 const MAX_BUDGET = 100_000_000
 const CARD_MS = 1000 // 10 cards + one 6★ pause + last flip = 13.7 s, under the 14 s limit (AC-9)
 const HERO_MS = 2500
 const STARS = { 3: '★★★', 4: '★★★★', 5: '★★★★★', 6: '★★★★★★' } as const
+const EMPTY = '<div class="empty"><span class="hint">Lempar Poké Ball untuk mulai!</span></div>'
 
 const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('id-ID')
 const pct = (x: number) => (x * 100).toFixed(2).replace('.', ',') + '%'
 
+// Images may be missing (public/pokemon/ is gitignored): a failed <img> removes itself, text stays.
+const IMG_FALLBACK = 'onerror="this.remove()"'
+const BALL = `<img class="ball" src="/pokemon/pokeball.png" alt="" ${IMG_FALLBACK}>`
+const tierChip = (r: Rarity) => `<span class="tierchip t${r}">${STARS[r]} ${TIERS[r]}</span>`
+
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 <div class="screen">
-  <h1>GACHA SIM</h1>
-  <p class="sub">Simulasi headhunting gaya Arknights. Uangnya pura-pura, peluangnya sungguhan.</p>
+  <h1 class="logo">${BALL}GACHA SIM</h1>
+  <p class="sub">Tangkap Pokémon gaya gacha. Uangnya pura-pura, peluangnya sungguhan.</p>
   <div class="layout">
     <div class="main">
-      <div class="stage" id="stage"><div class="empty">Tekan Pull untuk mulai</div></div>
+      <div class="dex">
+        <div class="dex-top"><span class="lens"></span><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><span class="dex-title">POKÉDEX GACHA</span></div>
+        <div class="stage" id="stage">${EMPTY}</div>
+      </div>
       <div class="actions">
-        <button class="btn" id="pull1">Pull x1 <small>${rp(PRICE_PER_PULL)}</small></button>
-        <button class="btn primary" id="pull10">Pull x10 <small>${rp(PRICE_PER_PULL * 10)}</small></button>
+        <button class="btn" id="pull1">${BALL}<span>Pull x1 <small>${rp(PRICE_PER_PULL)}</small></span></button>
+        <button class="btn primary" id="pull10">${BALL}<span>Pull x10 <small>${rp(PRICE_PER_PULL * 10)}</small></span></button>
         <span class="spacer"></span>
         <button class="btn ghost" id="reset">Reset sesi</button>
       </div>
     </div>
     <div class="side">
-      <div class="panel">
-        <h3>Budget</h3>
+      <div class="panel"><h3>Budget</h3><div class="body">
         <label class="field">Rp <input id="budget" aria-label="Budget" inputmode="numeric" value="500000"></label>
         <div class="stat"><span>Terpakai</span><b data-testid="spent"></b></div>
         <div class="stat"><span>Sisa</span><b data-testid="remaining"></b></div>
-      </div>
-      <div class="panel">
-        <h3>Pity</h3>
-        <div class="stat"><span>Tanpa 6★</span><b data-testid="pity"></b></div>
-        <div class="bar" data-testid="pity-bar"><span></span><i></i></div>
+      </div></div>
+      <div class="panel"><h3>Pity</h3><div class="body">
+        <div class="stat"><span>Tanpa Legendary</span><b data-testid="pity"></b></div>
+        <div class="hp"><span class="lbl">HP</span><div class="bar" data-testid="pity-bar"><span></span><i></i></div></div>
         <div class="bar-cap"><span>0</span><span>50</span><span>99</span></div>
-      </div>
-      <div class="panel">
-        <h3>Peluang pull berikutnya</h3>
-        <div class="rate" id="rate-6-row"><span class="s6">${STARS[6]}</span><b data-testid="rate-6"></b></div>
-        <div class="rate"><span class="s5">${STARS[5]}</span><b data-testid="rate-5"></b></div>
-        <div class="rate"><span class="s4">${STARS[4]}</span><b data-testid="rate-4"></b></div>
-        <div class="rate"><span class="s3">${STARS[3]}</span><b data-testid="rate-3"></b></div>
-      </div>
-      <div class="panel">
-        <h3>Ringkasan sesi</h3>
+      </div></div>
+      <div class="panel"><h3>Peluang pull berikutnya</h3><div class="body">
+        <div class="rate" id="rate-6-row">${tierChip(6)}<b data-testid="rate-6"></b></div>
+        <div class="rate">${tierChip(5)}<b data-testid="rate-5"></b></div>
+        <div class="rate">${tierChip(4)}<b data-testid="rate-4"></b></div>
+        <div class="rate">${tierChip(3)}<b data-testid="rate-3"></b></div>
+      </div></div>
+      <div class="panel"><h3>Ringkasan sesi</h3><div class="body">
         <div class="stat"><span>Total pull</span><b data-testid="total-pulls"></b></div>
-        <div class="stat"><span class="s6">6★</span><b data-testid="count-6"></b></div>
-        <div class="stat"><span class="s5">5★</span><b data-testid="count-5"></b></div>
-      </div>
-      <div class="panel">
-        <h3>Rata-rata dapat 6★</h3>
+        <div class="stat"><span>Legendary</span><b data-testid="count-6"></b></div>
+        <div class="stat"><span>Rare</span><b data-testid="count-5"></b></div>
+      </div></div>
+      <div class="panel"><h3>Rata-rata dapat Legendary</h3><div class="body">
         <div class="stat big"><span data-testid="avg-pulls">${String(AVG_PULLS_TO_6).replace('.', ',')} pull</span><b data-testid="avg-cost">${rp(AVG_COST_TO_6)}</b></div>
-      </div>
+      </div></div>
     </div>
   </div>
 </div>
@@ -71,6 +77,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div class="stat"><span id="warn-label"></span><b id="warn-cost"></b></div>
   <div class="stat"><span>Sisa budget</span><b id="warn-left"></b></div>
   <div class="stat over"><span>Lewat budget</span><b data-testid="over"></b></div>
+  <p class="ask">Tetap lempar Poké Ball?</p>
   <div class="actions">
     <button class="btn" id="cancel">Batal</button>
     <span class="spacer"></span>
@@ -111,8 +118,22 @@ function renderSide() {
   tid('count-5').textContent = String(s.count5)
 }
 
-const cardHtml = (r: PullResult) =>
-  `<div class="card c${r.rarity}" data-testid="card" data-open="false"><span class="st s${r.rarity}">${STARS[r.rarity]}</span><span class="nm">Operator ${r.rarity}★</span></div>`
+const closedCard = (r: PullResult) => `<div class="card c${r.rarity}" data-testid="card" data-open="false">${BALL}</div>`
+
+// Legendary uses full artwork as background; other tiers use a sprite <img>.
+const faceHtml = (r: PullResult) => {
+  const p = pokemonFor(r.rarity, r.roll)
+  const pic = r.rarity === 6
+    ? `<div class="art" data-art="${p.img}" style="background-image:url(${p.img})"></div>`
+    : `<img src="${p.img}" alt="" ${IMG_FALLBACK}>`
+  return `<div class="face">${pic}<span class="nm">${p.name}</span>${tierChip(r.rarity)}</div>`
+}
+
+const openCard = (el: HTMLElement, r: PullResult) => {
+  if (el.dataset.open === 'true') return
+  el.innerHTML = faceHtml(r)
+  el.dataset.open = 'true'
+}
 
 const setBusy = (busy: boolean) => buttons.forEach((b) => (b.disabled = busy))
 
@@ -126,13 +147,13 @@ const sleep = (ms: number) =>
 
 async function reveal(results: PullResult[]) {
   setBusy(true)
-  stage.innerHTML = `<div class="cards">${results.map(cardHtml).join('')}</div>
+  stage.innerHTML = `<div class="cards">${results.map(closedCard).join('')}</div>
     <div class="skip"><button class="btn ghost small" id="skip">Lewati ⏭</button></div>`
   const cards = [...stage.querySelectorAll<HTMLElement>('.card')]
   let skipped = false
   const finish = () => {
     stage.querySelector('.hero')?.remove()
-    cards.forEach((c) => (c.dataset.open = 'true'))
+    cards.forEach((c, i) => openCard(c, results[i]))
     $('.skip').dataset.done = 'true'
     skip = null
     shown = session
@@ -147,13 +168,13 @@ async function reveal(results: PullResult[]) {
     if (skipped) return
     const r = results[i]
     if (r.rarity === 6) {
-      stage.insertAdjacentHTML('beforeend', `<div class="hero" data-testid="hero">${cardHtml(r).replace('data-open="false"', 'data-open="true"').replace(' data-testid="card"', '')}
+      stage.insertAdjacentHTML('beforeend', `<div class="hero" data-testid="hero"><div class="card c6" data-open="true">${faceHtml(r)}</div>
         <p>6★ di pull ke-${r.pullNumber}. Biaya sampai dapat: ${rp(r.pullsTo6! * PRICE_PER_PULL)}</p></div>`)
       await sleep(HERO_MS)
       if (skipped) return
       stage.querySelector('.hero')?.remove()
     }
-    cards[i].dataset.open = 'true'
+    openCard(cards[i], r)
   }
   finish()
 }
@@ -183,7 +204,7 @@ stage.addEventListener('click', (e) => { if ((e.target as HTMLElement).closest('
 
 $('#reset').addEventListener('click', () => {
   session = shown = newSession(session.budget)
-  stage.innerHTML = '<div class="empty">Tekan Pull untuk mulai</div>'
+  stage.innerHTML = EMPTY
   renderSide()
 })
 
