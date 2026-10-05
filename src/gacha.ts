@@ -12,6 +12,7 @@ export interface Session {
 
 export interface PullResult {
   rarity: Rarity
+  roll: number // position inside the rarity band, [0, 1)
   pullNumber: number
   pullsTo6: number | null
 }
@@ -37,12 +38,17 @@ export const newSession = (budget: number | null = 500_000): Session => ({
   count5: 0,
 })
 
-const pickRarity = (pity: number, r: number): Rarity => {
+// Also returns where r falls inside its rarity band, so callers can pick within a pool
+// without drawing another random number.
+const pickRarity = (pity: number, r: number): { rarity: Rarity; roll: number } => {
   const { r6, r5, r4 } = rates(pity)
-  if (r < r6) return 6
-  if (r < r6 + r5) return 5
-  if (r < r6 + r5 + r4) return 4
-  return 3
+  const bands: [Rarity, number][] = [[6, r6], [5, r5], [4, r4]]
+  let lo = 0
+  for (const [rarity, width] of bands) {
+    if (r < lo + width) return { rarity, roll: (r - lo) / width }
+    lo += width
+  }
+  return { rarity: 3, roll: (r - lo) / (1 - lo) }
 }
 // pity = pulls without a 6★ so far. From pull 51 the 6★ rate rises 2% per pull, reaching 100% at pull 99.
 // The rest is split 8:50:40 across 5★, 4★, 3★ (decided 2026-10-05, option A).
@@ -57,9 +63,9 @@ export const pull = (s: Session, count: 1 | 10, rng: () => number): { session: S
   const session = { ...s, spent: s.spent + count * PRICE_PER_PULL }
   const results: PullResult[] = []
   for (let i = 0; i < count; i++) {
-    const rarity = pickRarity(session.pity, rng())
+    const { rarity, roll } = pickRarity(session.pity, rng())
     session.totalPulls++
-    results.push({ rarity, pullNumber: session.totalPulls, pullsTo6: rarity === 6 ? session.pity + 1 : null })
+    results.push({ rarity, roll, pullNumber: session.totalPulls, pullsTo6: rarity === 6 ? session.pity + 1 : null })
     if (rarity === 6) {
       session.count6++
       session.pity = 0
