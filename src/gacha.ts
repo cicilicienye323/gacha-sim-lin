@@ -85,4 +85,6 @@ export const expectedPullsTo6 = (): number => {
   }
   return expected
 }
-export const overBudget = (_s: Session, _count: 1 | 10): number => todo()
+// Rupiah the action would go over budget by; 0 when it fits or there is no budget.
+export const overBudget = (s: Session, count: 1 | 10): number =>
+  s.budget === null ? 0 : Math.max(0, s.spent + count * PRICE_PER_PULL - s.budget)
