@@ -1,4 +1,4 @@
-// Stub for GACHA-1 03-SKENARIO BUILDING: signatures only, filled in 04-DEVELOPMENT CODE.
+// Gacha rules: rates, pity, cost. Pure, no DOM; randomness comes in as a parameter.
 export type Rarity = 3 | 4 | 5 | 6
 
 export interface Session {
@@ -27,10 +27,6 @@ export const PRICE_PER_PULL = 8_000 // rupiah, integer
 // Fixed display values; a test checks them against expectedPullsTo6().
 export const AVG_PULLS_TO_6 = 34.59
 export const AVG_COST_TO_6 = 276_756
-
-const todo = (): never => {
-  throw new Error('not implemented')
-}
 
 export const newSession = (budget: number | null = 500_000): Session => ({
   budget,
@@ -63,7 +59,7 @@ export const pull = (s: Session, count: 1 | 10, rng: () => number): { session: S
   for (let i = 0; i < count; i++) {
     const rarity = pickRarity(session.pity, rng())
     session.totalPulls++
-    results.push({ rarity, pullNumber: session.totalPulls, pullsTo6: null })
+    results.push({ rarity, pullNumber: session.totalPulls, pullsTo6: rarity === 6 ? session.pity + 1 : null })
     if (rarity === 6) {
       session.count6++
       session.pity = 0
