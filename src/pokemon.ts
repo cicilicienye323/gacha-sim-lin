@@ -1,4 +1,4 @@
-// Pokémon per rarity. Images live in public/pokemon/ (gitignored, collected from Pinterest).
+// Pokémon per rarity. Images live in public/pokemon/ (collected from Pinterest).
 import type { Rarity } from './gacha'
 
 export interface Pokemon {
@@ -6,7 +6,7 @@ export interface Pokemon {
   img: string
 }
 
-const p = (name: string, file: string): Pokemon => ({ name, img: `/pokemon/${file}` })
+const p = (name: string, file: string): Pokemon => ({ name, img: `${import.meta.env.BASE_URL}pokemon/${file}` })
 
 export const TIERS: Record<Rarity, string> = { 3: 'Common', 4: 'Uncommon', 5: 'Rare', 6: 'Legendary' }
 

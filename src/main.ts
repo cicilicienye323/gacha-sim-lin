@@ -22,9 +22,9 @@ const EMPTY = '<div class="empty"><span class="hint">Throw a Poké Ball to start
 const rp = (n: number) => (n < 0 ? '−' : '') + 'Rp ' + Math.abs(n).toLocaleString('en-US')
 const pct = (x: number) => (x * 100).toFixed(2) + '%'
 
-// Images may be missing (public/pokemon/ is gitignored): a failed <img> removes itself, text stays.
+// If an image fails to load, the <img> removes itself and the text stays.
 const IMG_FALLBACK = 'onerror="this.remove()"'
-const BALL = `<img class="ball" src="/pokemon/pokeball.png" alt="" ${IMG_FALLBACK}>`
+const BALL = `<img class="ball" src="${import.meta.env.BASE_URL}pokemon/pokeball.png" alt="" ${IMG_FALLBACK}>`
 const tierChip = (r: Rarity) => `<span class="tierchip t${r}">${STARS[r]} ${TIERS[r]}</span>`
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
